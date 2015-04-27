@@ -3,7 +3,7 @@ title: Under the hood
 email: richardartoul@gmail.com
 description:
 baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://0.0.0.0:4000" # the base hostname & protocol for your site
+url: "richardartoul.github.io" # the base hostname & protocol for your site
 twitter_username:
 github_username: richardartoul
 
