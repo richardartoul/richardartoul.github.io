@@ -22,9 +22,9 @@ myCar.year = 2005;
 
 {% endhighlight %}
 
-Most Javascript interpreters use dictionary-like objects ([hash function](http://en.wikipedia.org/wiki/Hash_function) based) to store the location of object property values in memory. This structure makes retrieving the value of a property in Javascript more computationally expensive than it would be in a non-dynamic programming language like Java. In Java, all of an objects properties are determined by a fixed object layout before compilation and cannot be dynamically added/removed at runtime. As a result, the values of properties (or pointers to those properties) can be stored as a contiguous buffer in memory with a fixed-offset between each one. The length of an offset can easily be determined based on the properties type, whereas this is not possible in Javascript where a properties type can change during runtime. [This short blog post](http://www.programcreek.com/2011/11/what-do-java-objects-look-like-in-memory/) does a good job of explaining what Java objects look like in memory.
+Most Javascript interpreters use dictionary-like objects ([hash function](http://en.wikipedia.org/wiki/Hash_function) based) to store the location of object property values in memory. This structure makes retrieving the value of a property in Javascript more computationally expensive than it would be in a non-dynamic programming language like Java. In Java, all of an objects properties are determined by a fixed object layout before compilation and cannot be dynamically added/removed at runtime. As a result, the values of properties (or pointers to those properties) can be stored as a contiguous buffer in memory with a fixed-offset between each one. The length of an offset can easily be determined based on the property's type, whereas this is not possible in Javascript where a property's type can change during runtime. [This short blog post](http://www.programcreek.com/2011/11/what-do-java-objects-look-like-in-memory/) does a good job of explaining what Java objects look like in memory.
 
-In a non-dynamic language like Java, a properties location in memory can often be determined with only a single instruction whereas in Javascript several instructions are required to retrieve the location from a hash table. As a result, property lookup is much slower in Javascript than it is in other languages.
+In a non-dynamic language like Java, a property's location in memory can often be determined with only a single instruction whereas in Javascript several instructions are required to retrieve the location from a hash table. As a result, property lookup is much slower in Javascript than it is in other languages.
 
 Since the use of dictionaries to find the location of object properties in memory is so inefficient, V8 uses a different method instead: hidden classes. Hidden classes work similarly to the fixed object layouts (classes) used in languages like Java, except they are created at runtime. While reading the rest of this post, keep in mind that V8 attaches a hidden class to each and every object, and the purpose of the hidden classes is to optimize property access time. Now, Lets take a look at what they actually look like.
 
@@ -99,7 +99,7 @@ Optimization takeaways
 ======================
 
 1. Always instantiate your object properties in the same order so that hidden classes, and subsequently optimized code, can be shared.
-2. Adding properties to an object after instantiation will force a hidden class change and slow down an methods that were optimized for the previous hidden class. Instead, assign all of an objects properties in its constructor.
+2. Adding properties to an object after instantiation will force a hidden class change and slow down any methods that were optimized for the previous hidden class. Instead, assign all of an object's properties in its constructor.
 3. Code that executes the same method repeatedly will run faster than code that executes many different methods only once (due to inline caching).
 
 Sources
