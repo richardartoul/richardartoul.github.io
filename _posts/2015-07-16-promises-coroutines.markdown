@@ -59,7 +59,7 @@ At this point the coroutine will yield (pausing execution) and the statement tes
 1. value: the yielded value
 2. done: a boolean value that represents whether or not the coroutine has any more code to execute (false in this case) 
 
-The coroutine will remain paused until the next time testCoroutine.next() is called. This process repeats itself everytime we call testCoroutine.next() until there are no more yield statements, at which point the done property will be false.
+The coroutine will remain paused until the next time testCoroutine.next() is called. This process repeats itself everytime we call testCoroutine.next() until there are no more yield statements, at which point the done property will be true.
 
 But why did all the console logs evaluate to undefined? When you call .next(), the yield statement is replaced with whatever parameters you pass to .next(). This is how values can be "injected" into the coroutines mid-execution. To see this in action, create a new testCoroutine and then execute the following code:
 
@@ -99,7 +99,6 @@ Ok, now that we have a basic understand of promises and coroutines, how can we c
   });
   ajaxRoutine(val);
 {% endhighlight %}
-
 
 Even with only two asynchronous calls, this function is starting to get a little messy, and we're not even handling errors yet! Lets try rewriting this function using a combination of promises and a coroutines:
 
@@ -152,7 +151,7 @@ The code will continue to execute until it hits the yield statement on line 3 at
   }
 {% endhighlight %}
 
-Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, however, actually invoking the function and feeding the resolved promises back into the coroutine is a messy process. What we want is something that not only can yield promises, but can automatically wait for them to resolve, and resume execution. Luckily, the Bluebird promise library has such a function. The code snippet above can be rewritten like this:
+Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, however, actually invoking the function and feeding the resolved promises back into the coroutine is a messy process. What we want is something that not only can yield promises, but can automatically wait for them to resolve and then resume execution. Luckily, the Bluebird promise library has such a function. The code snippet above can be rewritten like this:
 
 {% highlight javascript linenos %}
   var Promise = require('bluebird');
@@ -172,7 +171,7 @@ Now that the ajax calls have been resolved, its very easy to reason about the re
   });
 {% endhighlight %}
 
-This time, the same process will occur and the code will execute asynchronously, waiting for each ajax request to complete before continuing, but the code be read and reasoned about in a synchronous manner. Pretty sweet, huh? Note that since Promise.coroutine() returns a promise, any errors that occur within the coroutine function can be caught by appending a single .catch() to the function invocation. On top of that, we've regained the ability to use return statements! We could easily do something like this:
+This time, the same process will occur and the code will execute asynchronously, waiting for each ajax request to complete before continuing, but the code can be read and reasoned about in a synchronous manner. Pretty sweet, huh? Note that since Promise.coroutine() returns a promise, any errors that occur within the coroutine function can be caught by appending a single .catch() to the function invocation. On top of that, we've regained the ability to use return statements! We could easily do something like this:
 
 {% highlight javascript linenos %}
   var Promise = require('bluebird');
