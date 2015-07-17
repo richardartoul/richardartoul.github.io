@@ -1,0 +1,26 @@
+Javascript doesn't suck
+
+//actually present the other sides argument instead of just listing them out
+
+//not meant to be an "javascript is amazing kind of post", but I would like to dispell some of the common myths that I hear perpetuated by people who are not very familiar with Javascript.
+
+1) Javascript is slow
+	While this used to be the case in the past, its not true anymore. The V8 engine has completely revamped the concept of an interpreted language, and Javascript can actually be very fast now. [Insert octane results here].
+
+2) Dynamically typed languages are bad, and you should feel bad for using them.
+	Dynamically typed languages can be extremely useful, even in a production environment. They allow products to be rapidly iterated in a way that is simply not possible in a language with strict typing. Dynamic typing is also particularly useful in web development when software needs to dynamically respond to input from unpredictable sources like users, and the rest of the web. You don't have to take my word for it though, [paul graham quote], [netflix engineer quote].
+
+3) Prototypes suck. Javascript isn't cool enough for real classes.
+	Usually when people talk about "real classes", they're talking about implementation inheritance where the subclass contains....more research to explain this properly.
+
+4) Node is bad and callback hell blah blah blah
+
+
+5) Javascript don't care
+	Many people take issue with the fact that seemingly regardless of how poorly written code is, Javascript will execute it without complaint where other languages would have thrown a compule or run-time error. However, keep in mind tha Javascript is executed [italics] in the browser [/italics]. Do you really want
+
+6) it is single-threaded
+
+
+
+Yes javascript is a quirky language, and there are quite a few things about it that could stand to change (as evidenced by Coffeescripts popularity and the new ECMA6 guidelines), however, rarely are the criticisms I hear leveled at Javascript warranted.

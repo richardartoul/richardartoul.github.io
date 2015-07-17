@@ -1,0 +1,196 @@
+Stuff everybody knows Talk
+
+"Being a programmer is solving a problemm once, then getting a computer to do it forever."
+
+Get really good at UNIX and bash.
+
+Get really good at an editor.
+
+Master the box model for browsers. Learn about the extra CSS selectors. CSS selectors should be semantic.
+
+How to determine whether to build a rich website (like gmail) or flat site (like new york times)
+	1) One big factor is actions per minute. Gmail would be super frustrating to use if everything you did required a page reload, but for NYT it doesn't matter
+	2) Load-to-dwell ratio: How long loading takes relative to how much time you spend on a page
+	3) Indexability: Can a search engine index your website? does it matter?
+	4) You don't always need an app. "I want to find out when this restaraunt is open. but first, let me rotate this carousel of food pictures" - said nobody ever
+
+Everybody starts with Javascript off until the entire page loads. Sometimes people will see the first 1/3rd of your website. Build websites that fail gracefully. Show them something if the page doesn't load completely, not a loading bar.
+	-http://www.filamentgroup.com/lab/weight-wait.html
+
+Handle the read case - nothing makes a user more angry than being unable to reach the information they need. Design for failure. Expect it to break and still have something to show - fail gracefully.
+
+UX Antipatterns - 
+	links go places, buttons do things. Remember that because it frustrates people when a button takes them somewhere or a link does something.
+	Nobody scrolls horizontally
+	Spatial memory - people have access to very few senses on the web. Don't fuck with them. Don't move shit around. Maintain spatial memory so people know where stuff is and it doesn't move too much.
+	Nobody cares about carousels. It confuses people and makes them angry. Aim over usability over impressiveness.
+	Don't reimplement browser functions (like back and stuff)
+	Don't break links. Ever. Your old urls will be hanging around the web for years.
+		Use pushState to change URLs in rich web apps. Even if you're not changing the page, it really improves the user experience.
+		Read up on twitter hashbang? Didn't understand it.
+You request to login to a website and the webserver sends you back a cookie, and forever your browser sends that cookie back to the server with each request. Keep cookies as small as possible. Cookies should be pointers to values in your database, not the information itself because cookies are frequently stolen. Cookies are stolen in two ways:
+	1) Javascript executed on the page without your presmission.
+		HttpOnly = true makes it so javascript cant edit your cookies
+		Secure = true - Cookies are set over http and can be sniffed. This variable makes it so your website runs only over https connections.
+
+Use LocalStorage - Can use it as a cache / database for local storage of your users information on their own machine. More secure than cookies.
+
+Security - You can't add it later. You have to think about it the entire time you're building the process. Defense in depth. Never trust the user, they are frequently evil, and always dumb. Can't have just one layer of security. Have to wrap security, inside security, inside security. You can't stop people from breaking into your system, but you can make it really hard and inconvenient. OWASP 10, good group for getting security tips from.
+
+1) XSS Cross Site Scripting - Someone ran javascript on your webpage without your permission. Especially terrible if your cookies are unsecured. This is basically the worst thing that can happen to you.
+
+2) CSRF: Cross Site Request Forgery. Results of stateless state of http. Forms can be submitted from anywhere to anywhere. You can't tell if a form came from your website, or a malicious website.
+
+3) Input validation bugs: someone puts their credit card info in a public field by accident
+
+4) Regular expressions: The best way to write one is to use one written 20 years ago
+
+5) SQL Injection: Website with no input validation. AND password = 'anything' OR 'x'='x'
+
+6) Command injection: eval() is evil
+
+7) Direct Object References: I don't understand this one, look into it more.
+
+8) Unpatched systems: If you cant reboot, fix that.
+
+Auth: Identification vs Authentication vs Authorization
+	Identification: I am bob - for humans
+	Authentication: I am bob, and I can prove it. - for computers
+	Authorizaton: Assumes authentification has already happened. Assuming I know who you are, what are you allowed to do?
+
+	Common security flaw is to confuse these. You must authenticate on every single request. Web is stateless, anyone can parachute in and pretend to be someone else. Anyone can edit cookies, so encypt them, and make whatever is in there as inoccous as possible.
+
+Salt and Hash passwords. Hint: use bcrypt. Lookup what a rainbow table is. Salt your passwords, I don't know what this means. Look that up too.
+
+Performance
+	Speed: Time taken for 1 request.
+	Efficiency: Resources per request - processor requirements.
+		Optimizing for efficiency is a high-scale problem.
+		Don't worry about optimizing for efficiency until you have thousands of servers. Usually just faster to buy another server.
+	Throughput = total requests / sec
+		Don't optimize for throughput.
+	Latency = time to (perceived) response. Latency can be fixed --> Rich apps don't fix laency, but they do reduce perceived latency. Real fix for latency is caching / CDN's - storing a copy closer to the user (in time or space). Storing it on a server in autstralia is location, storing it in your memory is time (faster to memory)
+
+	Types of caching: Client caching - Wikipedia does this to store their javascript on everyones computers. Reduced their bandwidth a lot.
+					  Edge caching - Store your data all over the world, and people are automatically routed to the server that is closest to them. Very expensive.
+					  Asset caching: Cache things in memory. All javascript, css, and imgs can be crammed in memory and served out of there.
+					  	1) Full page caching: If your website is flat and you don't have to generate content, put the whole page in memory and just serve that.
+					  	2) Fragment caching: Even if every webpage is different, big chunks of the website will be the same. Cram those parts into memory.
+				  	  Query caching: Cache the results of querying the database. Also, can do preprocessing. Store partially processed data.
+
+	Thundering herds: if you have a database that is expecting everything to be cached, that is going to be an issue. Build in jitter so that things are cached for one hour +- 10 minutes so that not all your servers are recaching at the same time.
+
+Testing: it will save your time. Trust him. Just do it. Also, automate them.
+	Write evils tests. You should write tests where you are afraid to find out what happens when your test executes.
+	Write specific tests, and write code that is sufficiently modular so you can eventually isolate your bugs.
+	Maintain your tests.
+	Tests must always pass. Cant have a "test that is known to faill" because one day it might start failing a different dangerous way.
+
+Debugging
+	Dont be superstitious. If you see code that you don't understand, just delete it.
+	Be deliberate. Form a theory, test the theory.
+	Binary sarch --> If you know there is a bug somewhere in your code, delete half your code.
+	Read the error logs. Not just the first line.
+	Write helpful error messages. What went wrong, why it went wrong, and where it went wrong.
+
+Coding antipatterns: Globals
+	function foo(x) {
+		return whereDidThisComeFrom + x;
+	}
+Don't use globals. Functions should only use things that are passed to them
+	
+	Giant function signatures: Don't write functions with a million parameters and then not specify which ones are important. Instead write function foo(a,b,options) <-- this requires sensible defaults
+
+	Variable names: you are not charged by the character and don't abbreviate random things
+
+	Stop being clever: Novelty is fun, but unproductive. Do things teh way everyone is used to seeing them.
+
+	Be boring: Not every architecture should be a special snowflake. You should be innovating on the higher-level, abstracted parts of your program, not the for loops.
+
+	Code readability: Long verybose comments everywhere. The audience is someone who was just hired 6 months from now and prevent them from ever having to ask you a question. Your comment should say not what your code does, but why it does it. Pretend your successor will have an address and a gun.
+
+	Time zones: All hail UTC. Store all your time as UTC. Only change to user-friendly format at last possible second, ideally at last possible second in browser in javascript. Time format: YYYY-MM-DDTHH:MM:SSZ <-- store your dates in this format. Don't use unix timestamps. They're more efficient but impossible to read. Let the computer do the work, save your own time.
+
+	Character encoding: internalization is hard. Use UTF-16, or at the very minimum UTF-8.
+
+Databases
+	Need to pick the right tool for the right job. No database works for every application.
+
+	CAP Theorem:
+		1) Consistency: When everyone requests the data, they see the same thing.
+		2) Availability: Every request gets a response
+		3) Partition tolerance: If your data is distributed, what happens when your devices can't speak for eachother.
+
+		You can't optimize for all three.
+
+	Indexability: Can I only lookup by primary key or by any key?
+	Durability: Can improve performance if you don't mind losing some data
+	Scalability: Can this database handle being on multiple servers, or does it only work when its running on a single server?
+	Speed vs. throughput: 
+
+	Types of databases:
+		Memory: The best database ever. Object store that is as close to your code as anything can possibly be. Super efficient. Cons: Restricted to one process. Also if machine reboots, its gone.
+			Memcache: Stores all your stuff in memory on one machine, and then lets all your other machines access that. Sometimes its ok if you lose all the data in your cache because you can pull it back out of your database. User sessions are often stored in memcache.
+		Redis: Similar to memcache, but stores things to disk. Doesn't store stuff to disk constantly, only ever 200ms. Might not sound like a big deal, but its a big deal if you're a place like a bank (200ms of transaction is a huge deal), but maybe not a big deal for an online gaming company. Has atomic operations and queues (wtf???)
+		MongoOhNoDb: Great for prototypes. Claims to be schemaless, but actually schema is in your code. Can be an issue if you have two pieces of code accessing the same database with different schemas. He doesn't think MongoDb. Missing a lot of stuff. Investiate more. He really hates this one haha.
+		CouchDB: Don't use couchDB.
+		levelDB: Popular in technical circles because you can NPM install it. So super simple to setup.
+		MySQL: Its what everyone uses.
+		Postgres: Like MySQL, but better in every way. Much harder to develop and administer than MySQL. Still super difficult to install even after 20 years. Postgres 9.3 has JSON-like features.
+		Oracle: Super amazing, but super expensive.
+
+		Aside: SQL is really not that bad. Solves the API pattern. Application still works when you change databases.
+			Downside: These databases come with the ORM antipattern (investigate this.)
+
+		Cassandra: Column store. Really great for storing tons of rows that are super identical to each other. Great for high-write and slow read situations. Really good for ad-networks: Receiving input from tons of servers saying, I showed this add and this add and this add. IT scales really well, you can just plug in more boxes and it just works. Once a week someone runs a report to see how many ads were run and it takes 24 hours, but it doesn't matter
+		Riak: Similar to cassandra. Extra feature: tunable though. Can make reads incredibly faster, and write slower, or anything inbetween. It can be all of CAP and exactly what you want it to be. Useful because its so dynamic.
+		Neo4J: Written to do one thing: its a graph database (like social network graphs).
+		The File System: Literally everybody uses it. Its a database with keys and values. Historic problem is that its really slow, but not as much of an issue now with solid states. Linked in was trying to build a queueing system for all the messages that linkedin users are constantly sending to each other. Eventually they couldn't find anything faster than just throwing things onto the disk and then reading them back again later. Look into this.
+		HDFS/HBase: HDFS is a filesystem built ontop of hadoop. HBase is a database built ontop of that.
+		S3: Its not a database, its a service from a company. Its like a filesystem, but it is even slower. It is infinitely durable, and infinitely scalable.
+
+	Replication: Always consider your replication strategy. Allows you to create multiple copies of your database so you can do other things faster. Can have 90 servers just handling and 10 handling all the writes if you have more reads than writes and slowly update the read servers from the write servers. Causes a data latency, but depending on your application this may or may not be an issue.
+
+	Aside: Stuff we think we know, but we don't really know.
+		1) Web frameworks: Please for the love of god don't write another web framework.
+		2) Tabs vs spaces. Don't argue about it.
+
+	Accessibility is not optional: accessibility is a website that fails gracefully. 3.4% of web users have limited vision. Red green color blind, motor control issues etc etc
+
+	Version control: Get good at git. Git is your friend. Version control is essential when you're working in teams, and you should all be working in teams. Similar to unix, you should be really good at and really fast at because you have to do it all the time.
+
+	Deployment: Get really good/fast at it, and automate it.
+
+	Backups: Replication is not a backup strategy. Backups that you don't periodically restore to see if they're broken are not backups. Backups have to be offsite and offsystem.
+		Codespaces: Github competitor. We have backups, do multiple backups, so much backing up etc was there selling point. What they didn't account for was firing a dude who deleted their entire company off the cloud. He had all their passwords.
+
+	Architectural principles: Think of the smallest possible thing that you can build, because even that is going to be significantly more complicated than you imagine. You must pick a goal and focus on that goal. But don't spend all day building automations and forget about building your product. Striking that balance is really hard.
+
+	Great architecture patterns:
+		1) MVC
+		2) MVP
+		3) AGH missing list
+
+	All great architecture patterns are modular. You take a complicated program and turn it into a simple program. "Software abstractions are Tetris: if you get them right, the levels below disappear"
+
+	Everything is an API, you're not passing data around. You're building a tool. Your goal is that it should be obvious from the function name and arguments name what a function does. Abstract away all complexity. Think about distributed system, you're going to do it eventually. Every system eventually becomes too big for one piece of hardware. Distribution solves problem, but it causes new ones. Plan for failures, don't dread it. A distributed system is always partially down, but not always down.
+
+	Planning: All estimates are bullshit. You're never even gonna be vaguely right. Estimates are bullshit because we don't think of the things that aren't coding. We don't add the time it takes us to write tests and fuck around on reddit (tumblr really dude?)
+
+	Interpersonal: "people will forget what you said, people will forget what you did, but eople will never forget how you made them feel."
+
+	Value yourself: Eat, sleep, exercise. Change of joining next facebook? Tiny. Change of being annoyed at wasting your youth, almost 100%.
+
+	Never work alone: Don't be the weird tortoise. Work at companies where you're not the only developer.
+
+	Keep learning and help others learn. When you learn stuff, you give it to your friends and the people who come after you.
+
+	Career: Startups are not the only fruit. People should spend time at big companies. Big companies get big, hard things done. Things that require tons of communication. He started talking about preventing sexual harassment?
+
+	http://sel.do/findjobs (How to find and get a job)
+
+	How to interview other eople: http://sel.do miss the link
+
+	Distribution = design for failure.
+
+	The things I'm looking for is smart and gets things donecha

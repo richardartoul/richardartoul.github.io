@@ -29,12 +29,12 @@ In a non-dynamic language like Java, a property's location in memory can often b
 Since the use of dictionaries to find the location of object properties in memory is so inefficient, V8 uses a different method instead: hidden classes. Hidden classes work similarly to the fixed object layouts (classes) used in languages like Java, except they are created at runtime. While reading the rest of this post, keep in mind that V8 attaches a hidden class to each and every object, and the purpose of the hidden classes is to optimize property access time. Now, Lets take a look at what they actually look like.
 
 {% highlight javascript %}
-function point(x,y) {
+function Point(x,y) {
 	this.x = x;
 	this.y = y;
 }
 
-var obj = new point(1,2);
+var obj = new Point(1,2);
 
 {% endhighlight %}
 
@@ -59,13 +59,13 @@ Note: Hidden class transitions are dependent on the order in which properties ar
 
 {% highlight javascript %}
 
-1  function point(x,y) {
+1  function Point(x,y) {
 2    this.x = x;
 3    this.y = y;
 4  }
 5 
-7  var obj1 = new point(1,2);
-8  var obj2 = new point(3,4);
+7  var obj1 = new Point(1,2);
+8  var obj2 = new Point(3,4);
 9
 10 obj1.a = 5;
 11 obj1.b = 10;
