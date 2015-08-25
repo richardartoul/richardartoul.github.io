@@ -13,7 +13,7 @@ The purpose of this blog post is to teach you how promises and generators can be
 Generators
 ==========
 
-Generators were added to Javascript as a result of ES6. A generator in JavaScript is a special type of function that can halt itself at any time using the keyword **yield**, and then later resume execution. Whats so interesting about generators is that they allows a developer to write a function that not only can **"return"** multiple times, but can also have values **"injected"** into it mid-execution.
+Generators were added to Javascript as a result of ES6. A generator in JavaScript is a special type of function that can halt itself at any time using the keyword **yield**, and then later resume execution. Whats so interesting about generators is that they allow developers to write functions that not only can **"return"** multiple times, but can also have values **"injected"** into them mid-execution.
 
 If that sounded confusing, don't worry, generators quickly begin to make sense once you start playing around with them. That said, open up your favorite ES6-compliant* Javascript REPL and paste in the following code:
 
@@ -48,7 +48,7 @@ console.log(testGenerator.next());
 // Object {value: undefined, done: true}
 {% endhighlight %}
 
-Everytime you call testGenerator.next(), the function executes until it encounters a yield statement. The `yield` statement functions like `return` in that the invoking function will evaluate to whatever value directly follows the keyword `yield` (except it will be wrapped in a container object, but we'll get to that in a moment). The first time you call `testGenerator.next()`, the `generatorFactory` function will execute until it encounters the first `yield` statement:
+Everytime you call testGenerator.next(), the function executes until it encounters a `yield` statement. The `yield` statement functions like `return` in that the invoking function will evaluate to whatever value directly follows the keyword `yield` (except it will be wrapped in a container object, but we'll get to that in a moment). The first time you call `testGenerator.next()`, the `generatorFactory` function will execute until it encounters the first `yield` statement:
 
 {% highlight javascript %}
 var result1 = yield 1;
@@ -216,7 +216,7 @@ But wait, there's more! `Promise.coroutine` actually returns a promise, so we ca
 
   /* ------ capturing return value ------ */
   var returnedVal = ajaxRoutine(val).then(function() {
-    console.log('This won't happen until the coroutine is done executing!');
+    console.log('This wont happen until the coroutine is done executing!');
   }).catch(function(err) {
     if (err) throw err;
   });
