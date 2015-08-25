@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Combining Promises and Generators to write Elegant Asynchronous code in Javascript"
-date:   2015-08-01 14:04:21
-categories: jekyll update
+title:  "Combining Promises and Generators to Write Elegant Asynchronous Code in Javascript"
+date:   2015-07-16 14:04:21
+categories: javascript
 ---
 
 Introduction
