@@ -17,7 +17,7 @@ Generators were added to Javascript as a result of ES6. A generator in JavaScrip
 
 If that sounded confusing, don't worry, generators quickly begin to make sense once you start playing around with them. That said, open up your favorite ES6-compliant* Javascript REPL and paste in the following code:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 /*the asterisk indicates that the function is a 
 generator instead of a traditional function */
 var generatorFactory = function* () {
@@ -34,7 +34,7 @@ var testGenerator = new generatorFactory();
 
 Now try calling testGenerator.next() a few times. You should get something that looks like this:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 console.log(testGenerator.next()); 
 // Object {value: 1, done: false}
 console.log(testGenerator.next()); 
@@ -63,7 +63,7 @@ The generator will remain paused until the next time `testGenerator.next()` is c
 
 But why did all the console logs evaluate to undefined? When `.next()` is called, the yield statement is replaced with whatever parameter is passed to `.next()`. This is how values can be **"injected"** into generators mid-execution. To see this in action, create a new `testGenerator` and then execute the following code:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 console.log(testGenerator.next()); 
 // Object {value: 1, done: false}
 console.log(testGenerator.next(4)); 
@@ -82,9 +82,9 @@ The values that are passed into `.next()` as parameters are stored in the `resul
 Combining Generators and Promises
 =================================
 
-Ok, now that we have a basic understand of promises and generators, how can we combine these to write elegant and easy-to-understand asychronous code? Well first, lets take a look at the problem we're trying to solve:
+Ok, now that we have a basic understanding of promises and generators, how can we combine them to write elegant and easy-to-understand asychronous code? Well first, lets take a look at the problem we're trying to solve:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 var ajaxFunction = function(val) {
   promisifiedAjaxCall(val).then(function(result1) {
     anotherPromisifiedAjaxCall().then(function(result2) {
@@ -102,7 +102,7 @@ ajaxRoutine(val);
 
 Even with only two asynchronous calls, this function is starting to get a little messy, and we're not even handling errors yet! Lets try rewriting this function using a combination of promises and a generators:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 var ajaxGenerator = function*(val) {
   var result1 = yield promisifiedAjaxCall(val);
   var result2 = yield anotherPromisifiedAjaxCall();
@@ -138,7 +138,7 @@ var result1Promise = testGenerator.next().value.then(function(result) {
 
 The code will continue to execute until it hits the `yield` statement on line 3 at which point the process will repeat, eventually assigning the result of the second ajax call to `result2`. The code can now be thought of as looking like this:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 var ajaxRoutine = function*(val) {
   var result1 = resultFromFirstAjaxCall;
   var result2 = resultFromSecondAjaxCall;
@@ -153,7 +153,7 @@ var ajaxRoutine = function*(val) {
 
 Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, however, actually invoking the function and feeding the resolved promises back into the generator is a messy process. What we want is something that not only can yield promises, but can automatically wait for them to resolve, feed their values back into itself, and then resume execution. Luckily, the Bluebird promise library has such a function. The code snippet above can be rewritten like this:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
 var Promise = require('bluebird');
 
 var ajaxRoutine = Promise.coroutine(function*(val) {
@@ -176,7 +176,7 @@ This time, the same process will occur and the code will execute asynchronously,
 
 Note that since `Promise.coroutine()` returns a promise, any errors that occur within the coroutine function can be caught by appending a single `.catch()` to the function invocation. With a single line of code, we've error handled the whole thing!
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
   var Promise = require('bluebird');
 
   var ajaxRoutine = Promise.coroutine(function*(val) {
@@ -199,7 +199,7 @@ Note that since `Promise.coroutine()` returns a promise, any errors that occur w
 
 But wait, there's more! `Promise.coroutine` actually returns a promise, so we can chain `.then` onto the coroutine invocation, like so:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
   var Promise = require('bluebird');
 
   var ajaxRoutine = Promise.coroutine(function*(val) {
@@ -224,7 +224,7 @@ But wait, there's more! `Promise.coroutine` actually returns a promise, so we ca
 
 Even more interestingly, since a generator is a function, we can actually use `return` statements! The only requirement is that we return a promise:
 
-{% highlight javascript linenos %}
+{% highlight js linenos %}
   var Promise = require('bluebird');
 
   var ajaxRoutine = Promise.coroutine(function*(val) {
