@@ -152,7 +152,7 @@ var ajaxRoutine = function*(val) {
 }
 {% endhighlight %}
 
-Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, however, actually invoking the function and feeding the resolved promises back into the generator is a messy process. In fact, we haven't really solved the problem at all yet because we're using nested callbacks to feed values back into the generator.
+Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, but invoking the generator and feeding the resolved promises back into it is a messy process. In fact, because we're using nested callbacks to manage the invocations of `testGenerator.next()`, we haven't really solved the problem at all yet. The whole point was to stop using nested callbacks in the first place!
 
 What we want is a function that not only yields promises, but can automatically wait for them to resolve, feed their values back into itself, and then resume execution. Luckily, the Bluebird promise library has such a function. The code snippet above can be rewritten like this:
 
