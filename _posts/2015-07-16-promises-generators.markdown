@@ -114,11 +114,10 @@ var ajaxGenerator = function*(val) {
   }
 }
 var testGenerator = new ajaxGenerator(val);
-var result1Promise = testGenerator.next().value.then(function(result) {
-  testGenerator.next(result);
-});
-var result2Promise = testGenerator.next().value.then(function(result) {
-  testGenerator.next(result);
+var result1Promise = testGenerator.next().value.then(function(result1) {
+  var result2Promise = testGenerator.next(result1).value.then(function(result2) {
+    testGenerator.next(result2);
+  });
 });
 {% endhighlight %}
 
@@ -128,15 +127,17 @@ So whats going on here? Lets walk through how this code will execute. The first 
 var result1 = yield promisifiedAjaxCall(val);
 {% endhighlight %}
 
-`result1Promise` variable will then be assigned a promise. Once the ajax call is complete and the promise resolves, the `.then()` function will execute, and the response from the ajax call will be passed back into the `ajaxGenerator` function (as a result of invoking `.next()`) and assigned to `result1`.
+`result1Promise` variable will then be assigned a promise. Once the ajax call is complete and the promise resolves, the `.then()` function will execute, and the response from the ajax call will be passed back into the `ajaxGenerator` function (as a result of invoking `.next(result1)`). Inside of the generator, the response from the ajax call will be assigned to `result1`.
 
 {% highlight javascript %}
-var result1Promise = testGenerator.next().value.then(function(result) {
-  testGenerator.next(result);
+var result1Promise = testGenerator.next().value.then(function(result1) {
+  var result2Promise = testGenerator.next(result1).value.then(function(result2) {
+    testGenerator.next(result2);
+  });
 });
 {% endhighlight %}
 
-The code will continue to execute until it hits the `yield` statement on line 3 at which point the process will repeat, eventually assigning the result of the second ajax call to `result2`. The code can now be thought of as looking like this:
+The generator function will resume execution until it hits the `yield` statement on line 3 at which point the process will repeat, eventually assigning the result of the second ajax call to `result2`. The code can now be thought of as looking like this:
 
 {% highlight js linenos %}
 var ajaxRoutine = function*(val) {
@@ -151,7 +152,9 @@ var ajaxRoutine = function*(val) {
 }
 {% endhighlight %}
 
-Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, however, actually invoking the function and feeding the resolved promises back into the generator is a messy process. What we want is something that not only can yield promises, but can automatically wait for them to resolve, feed their values back into itself, and then resume execution. Luckily, the Bluebird promise library has such a function. The code snippet above can be rewritten like this:
+Now that the ajax calls have been resolved, its very easy to reason about the remaining code in linear fashion as you would with any synchronous functon. This is nice, however, actually invoking the function and feeding the resolved promises back into the generator is a messy process. In fact, we haven't really solved the problem at all yet because we're using nested callbacks to feed values back into the generator.
+
+What we want is a function that not only yields promises, but can automatically wait for them to resolve, feed their values back into itself, and then resume execution. Luckily, the Bluebird promise library has such a function. The code snippet above can be rewritten like this:
 
 {% highlight js linenos %}
 var Promise = require('bluebird');
@@ -177,76 +180,76 @@ This time, the same process will occur and the code will execute asynchronously,
 Note that since `Promise.coroutine()` returns a promise, any errors that occur within the coroutine function can be caught by appending a single `.catch()` to the function invocation. With a single line of code, we've error handled the whole thing!
 
 {% highlight js linenos %}
-  var Promise = require('bluebird');
+var Promise = require('bluebird');
 
-  var ajaxRoutine = Promise.coroutine(function*(val) {
-    var result1 = yield promisifiedAjaxCall();
-    if (result1 === someValueIDontLike) return null;
-    var result2 = yield anotherPromisifiedAjaxCall();
-    if (result1 === someValue && result2 === someOtherValue) {
-      doSomeThing();
-    }
-    else {
-      doSomeOtherThing();
-    }
-  });
+var ajaxRoutine = Promise.coroutine(function*(val) {
+  var result1 = yield promisifiedAjaxCall();
+  if (result1 === someValueIDontLike) return null;
+  var result2 = yield anotherPromisifiedAjaxCall();
+  if (result1 === someValue && result2 === someOtherValue) {
+    doSomeThing();
+  }
+  else {
+    doSomeOtherThing();
+  }
+});
 
-  /* ------ capturing return value ------ */
-  var returnedVal = ajaxRoutine(val).catch(function(err) {
-    if (err) throw err;
-  });
+/* ------ capturing return value ------ */
+var returnedVal = ajaxRoutine(val).catch(function(err) {
+  if (err) throw err;
+});
 {% endhighlight %}
 
 But wait, there's more! `Promise.coroutine` actually returns a promise, so we can chain `.then` onto the coroutine invocation, like so:
 
 {% highlight js linenos %}
-  var Promise = require('bluebird');
+var Promise = require('bluebird');
 
-  var ajaxRoutine = Promise.coroutine(function*(val) {
-    var result1 = yield promisifiedAjaxCall();
-    if (result1 === someValueIDontLike) return null;
-    var result2 = yield anotherPromisifiedAjaxCall();
-    if (result1 === someValue && result2 === someOtherValue) {
-      doSomeThing();
-    }
-    else {
-      doSomeOtherThing();
-    }
-  });
+var ajaxRoutine = Promise.coroutine(function*(val) {
+  var result1 = yield promisifiedAjaxCall();
+  if (result1 === someValueIDontLike) return null;
+  var result2 = yield anotherPromisifiedAjaxCall();
+  if (result1 === someValue && result2 === someOtherValue) {
+    doSomeThing();
+  }
+  else {
+    doSomeOtherThing();
+  }
+});
 
-  /* ------ capturing return value ------ */
-  var returnedVal = ajaxRoutine(val).then(function() {
-    console.log('This wont happen until the coroutine is done executing!');
-  }).catch(function(err) {
-    if (err) throw err;
-  });
+/* ------ capturing return value ------ */
+var returnedVal = ajaxRoutine(val).then(function() {
+  console.log('This wont happen until the coroutine is done executing!');
+}).catch(function(err) {
+  if (err) throw err;
+});
 {% endhighlight %}
 
 Even more interestingly, since a generator is a function, we can actually use `return` statements! The only requirement is that we return a promise:
 
 {% highlight js linenos %}
-  var Promise = require('bluebird');
+var Promise = require('bluebird');
 
-  var ajaxRoutine = Promise.coroutine(function*(val) {
-    var result1 = yield promisifiedAjaxCall();
-    if (result1 === someValueIDontLike) return null;
-    var result2 = yield anotherPromisifiedAjaxCall();
-    if (result1 === someValue && result2 === someOtherValue) {
-      doSomeThing();
-      return somePromise();
-    }
-    else {
-      doSomeOtherThing();
-      return someOtherPromise();
-    }
-  });
+var ajaxRoutine = Promise.coroutine(function*(val) {
+  var result1 = yield promisifiedAjaxCall();
+  if (result1 === someValueIDontLike) return null;
+  var result2 = yield anotherPromisifiedAjaxCall();
+  if (result1 === someValue && result2 === someOtherValue) {
+    doSomeThing();
+    return somePromise();
+  }
+  else {
+    doSomeOtherThing();
+    return someOtherPromise();
+  }
+});
 
-  /* ------ capturing return value ------ */
-  var returnedVal = ajaxRoutine(val).then(function(resolvedPromiseValue) {
-    console.log('This is the resolved value from the promise: ', resolvedPromiseValue);
-  }).catch(function(err) {
-    if (err) throw err;
-  });
+/* ------ capturing return value ------ */
+var returnedVal = ajaxRoutine(val).then(function(resolvedPromiseValue) {
+  console.log('This is the resolved value from the promise: ', resolvedPromiseValue);
+}).catch(function(err) {
+  if (err) throw err;
+});
 {% endhighlight %}
 
 Hopefully now you understand how promises and generators can be combined to write elegant, easy-to-read asynchronous code. Spread the word! Next time someone complains to you about how they don't like Node.js because 'callback hell is unavoidable', tell them about generators and promises!
